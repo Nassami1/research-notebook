@@ -18,6 +18,7 @@ export interface NavigationState {
   path?: string;
   publicPath?: string;
   threadId?: string;
+  notebookId?: string;
 }
 
 export function useNavigationState() {
@@ -64,17 +65,32 @@ function matchesPathPrefix(pathname: string, prefix: string): boolean {
 
 export function navigationStateForPath(pathname: string): NavigationState {
   const threadId = threadIdFromPath(pathname);
+  const notebookId = notebookIdFromPath(pathname);
   return {
     view: viewForPath(pathname),
     path: pathname,
     publicPath: appPathFromLocalRoute(pathname),
     ...(threadId ? { threadId } : {}),
+    ...(notebookId ? { notebookId } : {}),
   };
+}
+
+export function notebookIdFromPath(pathname: string): string | null {
+  const match = pathname.match(/^\/n\/([^/?#]+)/);
+  const encoded = match?.[1];
+  if (!encoded) return null;
+  try {
+    return decodeURIComponent(encoded);
+  } catch {
+    return null;
+  }
 }
 
 function viewForPath(pathname: string): string {
   if (isChatPathname(pathname)) return "chat";
   if (pathname === HOME_PATH) return "home";
+  if (pathname === "/") return "notebooks";
+  if (pathname.startsWith("/n/")) return "notebook";
   if (pathname.startsWith("/database")) return "database";
   if (pathname.startsWith("/extensions")) return "extensions";
   if (pathname.startsWith("/observability")) return "observability";
@@ -93,6 +109,10 @@ function pathForView(view?: string): string {
       return NEW_CHAT_PATH;
     case "home":
       return HOME_PATH;
+    case "notebooks":
+      return "/";
+    case "notebook":
+      return "/";
     case "database":
       return "/database";
     case "extensions":

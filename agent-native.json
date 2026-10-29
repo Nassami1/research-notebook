@@ -4,6 +4,11 @@
     "firstRun": "off"
   },
   "doctor": {
-    "failOnBuild": false
+    "failOnBuild": false,
+    "dbToolScopingDenylist": {
+      "notebooks": "Single-user local demo app: notebooks, sources, and notes belong to the one local person. No tenant column until multi-user is in scope.",
+      "sources": "Single-user local demo app: a source always belongs to its notebook. No tenant column until multi-user is in scope.",
+      "notes": "Single-user local demo app: a note always belongs to its notebook. No tenant column until multi-user is in scope."
+    }
   }
 }

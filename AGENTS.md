@@ -1,6 +1,6 @@
-# Chat — Agent Guide
+# ResearchNotebook — Agent Guide
 
-Chat is the minimal chat-first agent-native app. `/` redirects to shared sign-in, then `/home`, the editable Get started page. Chat lives at `/chat`; new chats start there. Actions carry capabilities; screens exist only for durable workflows.
+Paste a source, get a structured markdown note, edit it in place, then ask the agent to refine it. The UI Save button and the agent both write through `update-note` on the same row. Routes: `/` notebooks, `/n/:id` notebook workspace, `/settings` LLM connection, `/chat` full-page chat.
 
 ## Skills
 
@@ -17,9 +17,27 @@ Use local docs only (no web research): `pnpm action docs-search --query "<topic>
 
 For custom branding, keep `server/plugins/agent-native-email-branding.ts` aligned: `app.name` appears in transactional email and optional `app.logoUrl` must be an absolute HTTPS URL.
 
+## ResearchNotebook domain
+
+- `notebooks(id, topic)` → `sources(id, notebook_id, raw_text)` → `notes(id, notebook_id, source_id, draft_kind, content)`; seeded with two sample notebooks so the demo runs offline.
+- `add-source` stores the source and drafts the note in one action. With no working LLM it writes a local draft from the first 300 characters (`draft_kind = "local"`); never fail the paste because the model is down.
+- Note markdown shape: `## Summary`, `## Key points` bullets, `## Quote` with one verbatim sentence. Never invent facts or citations.
+- Writes are only these actions; reject a free-text "write the note" shortcut and use `update-note` with the full markdown.
+- `notebookId` is in application state on `/n/:id`; read the notebook before editing so ids and current content are real.
+
+| Action | When |
+| --- | --- |
+| list-notebooks | find a notebook or its counts |
+| get-notebook | read sources + notes before an edit |
+| create-notebook | a new topic |
+| add-source | paste source text, get a drafted note |
+| update-note | replace one note's markdown (UI Save uses it too) |
+
+LLM settings live in the `llm-config` settings row: provider (`builder`, `openai`, `anthropic`, `ollama`, `custom`), model, base URL, key. Env fallback: `ANTHROPIC_API_KEY`, `OPENAI_API_KEY`/`OPENAI_BASE_URL`, `OLLAMA_BASE_URL`. Never return the key from an action.
+
 ## Application state
 
-- `navigation` describes the view and selected ids. Chat is `chat` at `/chat` and `/chat/<threadId>`; the Get started page is `home` at `/home`; `/` opens shared sign-in/signup.
+- `navigation` describes the view and selected ids. Chat is `chat` at `/chat` and `/chat/<threadId>`; notebooks are `notebooks` at `/`; a notebook is `notebook` at `/n/<notebookId>` with `notebookId` set; settings is `settings`.
 - Use `navigate` when supported and `view-screen` for a fresh read of visible details; basic navigation is already in `<current-screen>`.
 
 ## Building a domain app

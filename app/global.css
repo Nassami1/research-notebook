@@ -281,3 +281,22 @@
 ::-webkit-scrollbar-thumb:hover {
   background: hsl(var(--muted-foreground) / 0.34);
 }
+
+/* ResearchNotebook brand: ink + the logo's teal, with an editorial serif. */
+:root {
+  --brand: 178 48% 30%;
+  --font-serif: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+}
+
+.dark {
+  --brand: 172 46% 62%;
+}
+
+::selection {
+  background: hsl(var(--brand) / 0.25);
+}
+
+/* Note markdown preview reads like a page, not a form. */
+.note-preview p + p {
+  margin-top: 0.75rem;
+}

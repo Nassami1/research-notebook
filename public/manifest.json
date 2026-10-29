@@ -1,20 +1,20 @@
 {
-  "name": "Research Notebook",
-  "short_name": "Research Notebook",
-  "description": "Workspace app for Research Notebook.",
-  "start_url": "./home",
+  "name": "ResearchNotebook",
+  "short_name": "ResearchNotebook",
+  "description": "Paste sources, get structured notes you can edit — with an agent on the same data.",
+  "start_url": "./",
   "background_color": "#111111",
-  "theme_color": "#18181B",
+  "theme_color": "#111111",
   "icons": [
     {
-      "src": "icon-192.svg",
+      "src": "icon-192.png",
       "sizes": "192x192",
-      "type": "image/svg+xml"
+      "type": "image/png"
     },
     {
-      "src": "icon-512.svg",
+      "src": "icon-512.png",
       "sizes": "512x512",
-      "type": "image/svg+xml"
+      "type": "image/png"
     }
   ]
 }
