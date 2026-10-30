@@ -21,7 +21,8 @@ One small notebook where the agent and the person share the same notes.
 - The agent turns each source into a structured draft: a summary, key points,
   and one verbatim quote.
 - You edit that draft inline and save it. The agent can then expand it, rewrite
-  a point, or merge several notes, using the same action the Save button uses.
+  a point, merge several notes, or delete a draft, using the same actions the
+  UI uses.
 
 The point is not that an AI can write a note. The point is that the interface
 and the agent are two callers of one data layer, so an edit made in either place
@@ -50,8 +51,11 @@ you use it: "Saved, the agent reads this same row."
 - Notebook workspace: pasted sources on the left, drafts on the right.
 - Markdown editor with a live preview that understands the note shape
   (`## Summary`, `## Key points`, `## Quote`).
-- A connection panel for five model providers, including a tested
-  OpenAI-compatible custom endpoint.
+- One connection panel for five model providers, including a tested
+  OpenAI-compatible custom endpoint. The same saved connection powers drafting
+  and the right-hand agent chat.
+- Delete a note from the card or through the agent.
+- Download the whole notebook as markdown or JSON.
 - Two seeded notebooks with real source text and drafts, so the app is useful on
   first boot with no network and no API key.
 
@@ -72,11 +76,13 @@ you use it: "Saved, the agent reads this same row."
 - With no connection configured, the app reads `ANTHROPIC_API_KEY`,
   `OPENAI_API_KEY` (plus `OPENAI_BASE_URL`), or `OLLAMA_BASE_URL` from the
   deployment environment.
-- With neither, `add-source` still saves a local draft built from the first 300
-  characters of the source and labels it "local draft". Drafting never crashes
-  the paste.
+- With neither, `add-source` still saves a local draft in the same
+  Summary / Key points / Quote shape and labels it "local draft". Drafting never
+  crashes the paste, and the agent can refine a local draft like any other.
 
-The in-app agent chat has its own workspace connection under `/settings/agent`.
+Saving the connection also mirrors it into the framework's workspace credential
+store and default engine, so the agent chat replies with the same key, base URL,
+and model without a second setup step and without environment variables.
 
 ## Under the hood
 
@@ -105,6 +111,8 @@ Actions:
 | `create-notebook` | `{ topic } -> { notebookId }` |
 | `add-source` | `{ notebookId, text } -> { sourceId, noteId, draft, mode }` |
 | `update-note` | `{ noteId, content } -> { noteId, content }` |
+| `delete-note` | `{ noteId } -> { noteId }` (source is kept) |
+| `export-notebook` | `{ notebookId } -> { markdown, json }` |
 
 `add-source` is the only place that talks to a model: it drafts the note, then
 stores the source and the note in one transaction. The agent's system prompt
@@ -162,10 +170,15 @@ This is a local-first hackathon build.
 
 - The demo database is PGlite on disk. A public deploy needs a persistent
   `DATABASE_URL` and a `BETTER_AUTH_SECRET`, and must leave `AUTH_DISABLED`
-  unset. `pnpm build` refuses to build until those are provided.
+  unset. `pnpm build` refuses to build until those are provided:
+
+  ```bash
+  AUTH_DISABLED= \
+  BETTER_AUTH_SECRET="$(openssl rand -hex 32)" \
+  DATABASE_URL="postgres://user:pass@host:5432/db" \
+  pnpm build
+  ```
 - Notebooks are single-user; there is no sharing or tenancy yet.
-- Deleting a note is not exposed; the submitted workflow is paste, draft, edit,
-  refine.
 - Web crawling, PDF export, and confidence scoring are deliberately out of
   scope.
 

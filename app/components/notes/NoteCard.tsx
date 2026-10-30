@@ -1,5 +1,5 @@
 import { actionErrorMessage, useActionMutation } from "@agent-native/core/client/hooks";
-import { IconAlertTriangle, IconCheck } from "@tabler/icons-react";
+import { IconAlertTriangle, IconCheck, IconTrash } from "@tabler/icons-react";
 import { useEffect, useRef, useState } from "react";
 
 import { Badge } from "@/components/ui/badge";
@@ -23,7 +23,9 @@ function wordCount(text: string) {
 export function NoteCard({ note, index }: { note: NoteRow; index: number }) {
   const [value, setValue] = useState(note.content);
   const [justSaved, setJustSaved] = useState(false);
+  const [confirmingDelete, setConfirmingDelete] = useState(false);
   const save = useActionMutation("update-note");
+  const remove = useActionMutation("delete-note");
   const dirty = value !== note.content;
   const valueRef = useRef(value);
   const serverRef = useRef(note.content);
@@ -70,6 +72,35 @@ export function NoteCard({ note, index }: { note: NoteRow; index: number }) {
         <span className="ms-auto text-[11px] text-muted-foreground">
           {wordCount(value)}
         </span>
+        {confirmingDelete ? (
+          <span className="flex items-center gap-1.5">
+            <Button
+              size="sm"
+              variant="destructive"
+              className="h-6 px-2 text-[11px]"
+              disabled={remove.isPending}
+              onClick={() => remove.mutate({ noteId: note.id })}
+            >
+              {remove.isPending ? "Deleting..." : "Delete?"}
+            </Button>
+            <button
+              type="button"
+              className="text-[11px] text-muted-foreground underline-offset-2 hover:underline"
+              onClick={() => setConfirmingDelete(false)}
+            >
+              Cancel
+            </button>
+          </span>
+        ) : (
+          <button
+            type="button"
+            aria-label="Delete note"
+            className="rounded p-1 text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            onClick={() => setConfirmingDelete(true)}
+          >
+            <IconTrash className="size-3.5" strokeWidth={1.8} />
+          </button>
+        )}
       </header>
 
       <div className="grid md:grid-cols-2 md:divide-x md:divide-border/70">
@@ -88,7 +119,12 @@ export function NoteCard({ note, index }: { note: NoteRow; index: number }) {
       </div>
 
       <footer className="flex items-center gap-3 border-t border-border/70 px-4 py-2.5">
-        {save.error ? (
+        {remove.error ? (
+        <p className="flex items-center gap-1.5 text-xs text-destructive">
+          <IconAlertTriangle className="size-3.5" />
+          {actionErrorMessage(remove.error) ?? "Could not delete the note."}
+        </p>
+      ) : save.error ? (
           <p className="flex items-center gap-1.5 text-xs text-destructive">
             <IconAlertTriangle className="size-3.5" />
             {actionErrorMessage(save.error) ?? "Could not save the note."}

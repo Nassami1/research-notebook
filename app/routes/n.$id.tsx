@@ -1,7 +1,13 @@
-import { actionErrorMessage, useActionMutation, useActionQuery } from "@agent-native/core/client/hooks";
+import { actionErrorMessage, callAction, useActionMutation, useActionQuery } from "@agent-native/core/client/hooks";
 import { sendToAgentChat } from "@agent-native/toolkit/app/chat";
 import { useSetPageTitle } from "@agent-native/toolkit/app-shell";
-import { IconArrowLeft, IconLoader2, IconSend, IconSparkles } from "@tabler/icons-react";
+import {
+  IconArrowLeft,
+  IconDownload,
+  IconLoader2,
+  IconSend,
+  IconSparkles,
+} from "@tabler/icons-react";
 import { useMemo, useState } from "react";
 import { Link, useParams } from "react-router";
 import { toast } from "sonner";
@@ -49,6 +55,21 @@ export default function NotebookPage() {
         },
       },
     );
+  }
+
+  async function download(format: "md" | "json") {
+    const result = await callAction("export-notebook", { notebookId: id }, { method: "GET" });
+    const body =
+      format === "md" ? result.markdown : JSON.stringify(result.json, null, 2);
+    const blob = new Blob([body], {
+      type: format === "md" ? "text/markdown;charset=utf-8" : "application/json",
+    });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `${meta.topic.replace(/[^a-z0-9]+/gi, "-").replace(/^-|-$/g, "").toLowerCase() || "notebook"}.${format}`;
+    link.click();
+    URL.revokeObjectURL(url);
   }
 
   function askAgentToMerge() {
@@ -113,10 +134,20 @@ export default function NotebookPage() {
             {pending ? "drafting…" : "agent + you, same rows"}
           </p>
         </div>
-        <Button variant="outline" size="sm" onClick={askAgentToMerge}>
-          <IconSparkles className="size-4" />
-          Merge notes with the agent
-        </Button>
+        <div className="flex flex-wrap items-center gap-2">
+          <Button variant="outline" size="sm" onClick={() => void download("md")}>
+            <IconDownload className="size-4" />
+            Download .md
+          </Button>
+          <Button variant="outline" size="sm" onClick={() => void download("json")}>
+            <IconDownload className="size-4" />
+            Download .json
+          </Button>
+          <Button variant="outline" size="sm" onClick={askAgentToMerge}>
+            <IconSparkles className="size-4" />
+            Merge notes with the agent
+          </Button>
+        </div>
       </header>
 
       <div className="mt-8 grid gap-8 lg:grid-cols-[340px_minmax(0,1fr)] lg:items-start">

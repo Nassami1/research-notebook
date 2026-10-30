@@ -1,3 +1,4 @@
+import { getAgentEngineEntry, registerBuiltinEngines } from "@agent-native/core/agent/engine";
 import { getSetting } from "@agent-native/core/settings";
 
 export type LlmProvider = "builder" | "openai" | "anthropic" | "ollama" | "custom";
@@ -10,12 +11,23 @@ export const LLM_PROVIDERS: LlmProvider[] = [
   "custom",
 ];
 
+registerBuiltinEngines();
+
+function engineDefault(engine: string, fallback: string): string {
+  return getAgentEngineEntry(engine)?.defaultModel ?? fallback;
+}
+
+/**
+ * Defaults come from the installed engines, not from a hand-written list, so a
+ * fresh install proposes the model the framework actually ships. Custom
+ * endpoints have no sensible default; the field starts empty.
+ */
 export const DEFAULT_MODELS: Record<LlmProvider, string> = {
-  builder: "gpt-6-luna",
-  openai: "gpt-6-luna",
-  anthropic: "claude-sonnet-5-5",
-  ollama: "llama3.1",
-  custom: "gpt-4o-mini",
+  builder: engineDefault("builder", "claude-sonnet-5-5"),
+  openai: engineDefault("ai-sdk:openai", "gpt-4o-mini"),
+  anthropic: engineDefault("anthropic", "claude-3-5-sonnet-latest"),
+  ollama: engineDefault("ai-sdk:ollama", "llama3.1"),
+  custom: "",
 };
 
 export interface LlmConfig {

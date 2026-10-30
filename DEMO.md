@@ -13,6 +13,7 @@ Record at 1440×900, dark theme, browser chrome hidden. One notebook is enough.
 | 0:52 | agent rail | Open the agent, ask: "Expand the second bullet of the newest note with one more detail from its source." |
 | 1:06 | note | The agent rewrites the markdown through `update-note`; the card updates without a refresh. |
 | 1:16 | `/settings` | Show the five providers, the Custom base URL + key fields, and press **Test connection** — "Connected." |
-| 1:26 | `/` | Close on the notebook list. "One data layer, two callers: the UI and the agent call the same actions." |
+| 1:26 | `/n/seed-sleep` | Press **Download .md** — "the whole notebook, sources and notes, leaves through a read action." |
+| 1:32 | `/` | Close on the notebook list. "One data layer, two callers: the UI and the agent call the same actions." |
 
 Reset before recording: delete `data/pglite`, restart `pnpm dev` to reseed, then set the model in `/settings`.

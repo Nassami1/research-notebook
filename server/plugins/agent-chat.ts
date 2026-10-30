@@ -13,6 +13,7 @@ const INITIAL_TOOL_NAMES = [
   "create-notebook",
   "add-source",
   "update-note",
+  "delete-note",
 ];
 
 export default createAgentChatPlugin({

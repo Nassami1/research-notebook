@@ -20,7 +20,7 @@ For custom branding, keep `server/plugins/agent-native-email-branding.ts` aligne
 ## ResearchNotebook domain
 
 - `notebooks(id, topic)` → `sources(id, notebook_id, raw_text)` → `notes(id, notebook_id, source_id, draft_kind, content)`; seeded with two sample notebooks so the demo runs offline.
-- `add-source` stores the source and drafts the note in one action. With no working LLM it writes a local draft from the first 300 characters (`draft_kind = "local"`); never fail the paste because the model is down.
+- `add-source` stores the source and drafts the note in one action. With no working LLM it writes a local draft in the same Summary/Key points/Quote shape (`draft_kind = "local"`); never fail the paste because the model is down.
 - Note markdown shape: `## Summary`, `## Key points` bullets, `## Quote` with one verbatim sentence. Never invent facts or citations.
 - Writes are only these actions; reject a free-text "write the note" shortcut and use `update-note` with the full markdown.
 - `notebookId` is in application state on `/n/:id`; read the notebook before editing so ids and current content are real.
@@ -32,8 +32,10 @@ For custom branding, keep `server/plugins/agent-native-email-branding.ts` aligne
 | create-notebook | a new topic |
 | add-source | paste source text, get a drafted note |
 | update-note | replace one note's markdown (UI Save uses it too) |
+| delete-note | remove one note; the source is kept |
+| export-notebook | read topic + sources + notes as markdown and JSON |
 
-LLM settings live in the `llm-config` settings row: provider (`builder`, `openai`, `anthropic`, `ollama`, `custom`), model, base URL, key. Env fallback: `ANTHROPIC_API_KEY`, `OPENAI_API_KEY`/`OPENAI_BASE_URL`, `OLLAMA_BASE_URL`. Never return the key from an action.
+LLM settings live in the `llm-config` settings row: provider (`builder`, `openai`, `anthropic`, `ollama`, `custom`), model, base URL, key. Saving also mirrors the connection into the workspace credential store so the agent chat uses it. Env fallback: `ANTHROPIC_API_KEY`, `OPENAI_API_KEY`/`OPENAI_BASE_URL`, `OLLAMA_BASE_URL`. Never return the key from an action.
 
 ## Application state
 

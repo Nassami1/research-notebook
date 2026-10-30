@@ -12,7 +12,6 @@ type Provider = "builder" | "openai" | "anthropic" | "ollama" | "custom";
 const PROVIDERS: {
   id: Provider;
   label: string;
-  model: string;
   keyHint?: string;
   url?: { label: string; placeholder: string; optional?: boolean };
   note?: string;
@@ -20,32 +19,27 @@ const PROVIDERS: {
   {
     id: "builder",
     label: "Builder.io",
-    model: "gpt-6-luna",
     note: "Uses the Builder.io connection of this workspace (or BUILDER_PRIVATE_KEY in .env).",
   },
   {
     id: "openai",
     label: "OpenAI",
-    model: "gpt-6-luna",
     keyHint: "sk-…",
   },
   {
     id: "anthropic",
     label: "Anthropic",
-    model: "claude-sonnet-5-5",
     keyHint: "sk-ant-…",
   },
   {
     id: "ollama",
     label: "Ollama (local)",
-    model: "llama3.1",
     url: { label: "Base URL", placeholder: "http://localhost:11434" },
     note: "No key needed. The model must already be pulled in Ollama.",
   },
   {
     id: "custom",
     label: "Custom (OpenAI-compatible)",
-    model: "gpt-4o-mini",
     keyHint: "API key",
     url: { label: "Base URL", placeholder: "https://my-proxy.example.com/v1" },
     note: "Calls POST {baseUrl}/chat/completions with Authorization: Bearer {key}. Works with DeepSeek, OpenRouter, Together, and local proxies.",
@@ -63,7 +57,7 @@ export default function SettingsRoute() {
   const test = useActionMutation("test-llm-connection");
 
   const [provider, setProvider] = useState<Provider>("openai");
-  const [model, setModel] = useState("gpt-6-luna");
+  const [model, setModel] = useState("");
   const [baseUrl, setBaseUrl] = useState("");
   const [apiKey, setApiKey] = useState("");
   const [status, setStatus] = useState<{ ok: boolean; message: string } | null>(null);
@@ -82,8 +76,7 @@ export default function SettingsRoute() {
 
   function changeProvider(next: Provider) {
     setProvider(next);
-    const match = PROVIDERS.find((item) => item.id === next);
-    if (match) setModel(match.model);
+    setModel(settings.data?.defaults?.[next] ?? "");
     setBaseUrl(next === "ollama" ? "http://localhost:11434" : "");
     setApiKey("");
     setStatus(null);
@@ -126,8 +119,9 @@ export default function SettingsRoute() {
       <header className="mt-4 border-b border-border pb-6">
         <h1 className="font-serif text-3xl tracking-tight">LLM connection</h1>
         <p className="mt-2 max-w-lg text-sm leading-relaxed text-muted-foreground">
-          Used to draft a note when you paste a source. Without a working model the
-          app still saves a local draft from the first 300 characters.
+          One connection for both: drafting a note when you paste a source, and
+          the agent that refines it. Without a working model the app still saves
+          a local draft in the note shape.
         </p>
       </header>
 
@@ -184,6 +178,7 @@ export default function SettingsRoute() {
               id="model"
               value={model}
               onChange={(event) => setModel(event.target.value)}
+              placeholder={provider === "custom" ? "e.g. deepseek-v4.1-flash" : undefined}
               spellCheck={false}
               className="mt-2 h-11 w-full rounded-lg border border-input bg-card px-3 font-mono text-[13px] shadow-sm outline-none focus-visible:border-[hsl(var(--brand))] focus-visible:ring-2 focus-visible:ring-[hsl(var(--brand))]/20"
             />
@@ -250,23 +245,6 @@ export default function SettingsRoute() {
               <span className="break-words">{status.message}</span>
             </div>
           ) : null}
-
-          <div className="border-t border-border pt-5">
-            <h2 className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
-              Agent chat
-            </h2>
-            <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
-              The right-hand agent that refines notes uses the workspace agent
-              connection, which has its own provider keys and model picker.
-            </p>
-            <Link
-              to="/settings/agent"
-              className="mt-2 inline-flex items-center gap-1 text-xs font-medium text-[hsl(var(--brand))] hover:underline"
-            >
-              Open agent settings
-              <IconArrowLeft className="size-3 rotate-180" />
-            </Link>
-          </div>
 
           <div className="border-t border-border pt-5">
             <h2 className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">

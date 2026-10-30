@@ -7,6 +7,7 @@ import { z } from "zod";
 
 import { getDb, schema } from "../server/db/index.js";
 import { engineFor, readLlmConfig } from "../server/lib/llm.js";
+import { localDraft } from "../server/lib/local-draft.js";
 
 const DRAFT_PROMPT = `You turn one pasted source into one structured research note.
 Return markdown only, in exactly this shape:
@@ -20,11 +21,6 @@ One or two sentences in your own words.
 > One short verbatim sentence copied from the source.
 
 Use only facts in the source. Never invent numbers, names, or citations. Keep the whole note under 170 words.`;
-
-function localDraft(text: string): string {
-  const trimmed = text.trim();
-  return trimmed.length > 300 ? `${trimmed.slice(0, 300).trimEnd()}...` : trimmed;
-}
 
 export default defineAction({
   description:
