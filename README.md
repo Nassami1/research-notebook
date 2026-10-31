@@ -136,17 +136,6 @@ notebooks.
 The local demo sets `AUTH_DISABLED=true` in `.env` so it opens without an
 account. Remove that line to run with the template's normal sign-in.
 
-## The 90-second demo
-
-1. Open a seeded notebook, for example "Sleep and memory consolidation".
-2. Paste a paragraph into the source box and press **Draft note**. The model
-   returns Summary, Key points, and Quote.
-3. Change one line in the editor. The preview updates as you type.
-4. Press **Save note**. The note is written through `update-note`.
-5. Open the agent rail and ask it to expand the newest bullet with one more
-   detail from its source. The same card updates without a refresh.
-6. Open `/settings`, show the providers, and press **Test connection** against a
-   custom endpoint.
 
 ## Project layout
 
